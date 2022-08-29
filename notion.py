@@ -63,6 +63,7 @@ class Notion:
                 artist["id"] = result["id"]
                 artists.append(artist)
         return artists
+    
     def artist_study_prompts(self):
         return self.filtered_prompts({
                     "filter": {
