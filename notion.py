@@ -142,6 +142,10 @@ class Notion:
                               "multi_select": {
                               "does_not_contain": "artist_study"
                             }},
+                            { "property": "tags",
+                              "multi_select": {
+                              "does_not_contain": "mod_study"
+                            }},
                             { "property": "done",
                               "checkbox": {
                               "equals": False
