@@ -80,6 +80,33 @@ class Notion:
                 artists.append(artist)
         return artists
 
+    def filtered_modifiers(self, query):
+        artists = []
+        
+        database_id = self.config["notion"]["modifier_db"]
+
+        headers = self.headers()
+        url = f"https://api.notion.com/v1/databases/{database_id}/query"
+        response = requests.post(url, headers = headers, data = json.dumps(query))
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            results = data["results"]
+            if data["has_more"]:
+                while data["has_more"]:
+                    sleep(0.3)
+                    query["start_cursor"] = data["next_cursor"]
+                    response = requests.post(url, headers = headers, data = json.dumps(query))
+                    if response.status_code == 200:
+                        data = json.loads(response.content)
+                        results = results + data["results"]
+                    else: break
+
+            for result in results:
+                artist = {}
+                artist["modifier"] = result["properties"]["modifier"]["title"][0]["plain_text"]
+                artist["id"] = result["id"]
+                artists.append(artist)
+        return artists
     ## Prompts   
     def artist_study_prompts(self):
         return self.filtered_prompts({
@@ -87,6 +114,19 @@ class Notion:
                         "property": "tags",
                         "multi_select": {
                             "contains": "artist_study"
+                        }
+                    },
+                    "sorts": [{
+                        "property": "prompt",
+                        "direction": "ascending"
+                    }]
+                 })
+    def mods_study_prompts(self):
+        return self.filtered_prompts({
+                    "filter": {
+                        "property": "tags",
+                        "multi_select": {
+                            "contains": "mod_study"
                         }
                     },
                     "sorts": [{
@@ -148,9 +188,25 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
-#n = Notion("config.yaml")
+    ## Modifiers
+    def empty_quality_modifiers(self):
+        return self.filtered_modifiers({
+                    "filter": {
+                        "property": "quality",
+                        "number": {
+                            "is_empty": True
+                        }
+                    },
+                    "sorts": [{
+                        "property": "modifier",
+                        "direction": "ascending"
+                    }]
+                 })
 
-#prompts = n.queued_prompts()
+n = Notion("config.yaml")
+
+#mods = n.empty_quality_modifiers()
+#print(len(mods))
 #n.mark_prompt_done(prompts[0])
-#print(prompts)
+#print(mods)
 
