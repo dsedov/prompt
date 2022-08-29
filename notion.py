@@ -34,7 +34,10 @@ class Notion:
                 prompt = {}
                 prompt["prompt"] = result["properties"]["prompt"]["title"][0]["plain_text"]
                 prompt["iterations"] = result["properties"]["iterations"]["number"]
-                prompt["resolution"] = result["properties"]["resolution"]["select"]["name"]
+                try:
+                    prompt["resolution"] = result["properties"]["resolution"]["select"]["name"]
+                except:
+                    prompt["resolution"] = "512x512"
                 prompt["steps"] = result["properties"]["steps"]["number"]
                 prompt["scale"] = result["properties"]["scale"]["number"]
                 prompt["seed"] = result["properties"]["seed"]["number"]
@@ -209,8 +212,8 @@ class Notion:
 
 n = Notion("config.yaml")
 
-#mods = n.empty_quality_modifiers()
-#print(len(mods))
+mods = n.mods_study_prompts()
+print(len(mods))
 #n.mark_prompt_done(prompts[0])
 #print(mods)
 
