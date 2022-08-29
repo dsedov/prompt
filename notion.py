@@ -34,6 +34,10 @@ class Notion:
                 prompt = {}
                 prompt["prompt"] = result["properties"]["prompt"]["title"][0]["plain_text"]
                 prompt["iterations"] = result["properties"]["iterations"]["number"]
+                prompt["resolution"] = result["properties"]["resolution"]["select"]["name"]
+                prompt["steps"] = result["properties"]["steps"]["number"]
+                prompt["scale"] = result["properties"]["scale"]["number"]
+                prompt["seed"] = result["properties"]["seed"]["number"]
                 prompt["id"] = result["id"]
                 prompts.append(prompt)
         return prompts
