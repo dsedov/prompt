@@ -33,6 +33,7 @@ class Notion:
             for result in results:
                 prompt = {}
                 prompt["prompt"] = result["properties"]["prompt"]["title"][0]["plain_text"]
+                prompt["iterations"] = result["properties"]["iterations"]["number"]
                 prompt["id"] = result["id"]
                 prompts.append(prompt)
         return prompts
@@ -103,7 +104,7 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
-#n = Notion("config.yaml")
-#prompts = n.artist_study_prompts()
-#print(prompts)
+n = Notion("config.yaml")
+prompts = n.artist_study_prompts()
+print(prompts)
 
