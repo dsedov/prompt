@@ -37,6 +37,17 @@ class Notion:
                 prompt["id"] = result["id"]
                 prompts.append(prompt)
         return prompts
+    def update_prompt(self, page_id, query):
+        prompts = []
+        
+        database_id = self.config["notion"]["prompt_db"]
+
+        headers = self.headers()
+        url = f"https://api.notion.com/v1/pages/{page_id}"
+        response = requests.patch(url, headers = headers, data = json.dumps(query))
+        print(response.status_code)
+        print(response.content)
+
     def filtered_artists(self, query):
         artists = []
         
@@ -64,7 +75,8 @@ class Notion:
                 artist["id"] = result["id"]
                 artists.append(artist)
         return artists
-    
+
+    ## Prompts   
     def artist_study_prompts(self):
         return self.filtered_prompts({
                     "filter": {
@@ -78,6 +90,34 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
+    def queued_prompts(self):
+        return self.filtered_prompts({
+                    "filter": {
+                        "and": [
+                            { "property": "tags",
+                              "multi_select": {
+                              "does_not_contain": "artist_study"
+                            }},
+                            { "property": "done",
+                              "checkbox": {
+                              "equals": False
+                            }}
+                        ]
+                    },
+                    "sorts": [{
+                        "property": "prompt",
+                        "direction": "ascending"
+                    }]
+                 })
+    def mark_prompt_done(self, prompt):
+        self.update_prompt(prompt["id"],{
+            "properties":{
+                "done":{
+                    "checkbox" : True
+                }
+            }
+        })
+    ## Artists
     def fav_artists(self):
         return self.filtered_artists({
                     "filter": {
@@ -104,7 +144,9 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
-n = Notion("config.yaml")
-prompts = n.artist_study_prompts()
-print(prompts)
+#n = Notion("config.yaml")
+
+#prompts = n.queued_prompts()
+#n.mark_prompt_done(prompts[0])
+#print(prompts)
 
