@@ -82,7 +82,6 @@ class Notion:
                 artist["id"] = result["id"]
                 artists.append(artist)
         return artists
-
     def filtered_modifiers(self, query):
         artists = []
         
@@ -110,6 +109,33 @@ class Notion:
                 artist["id"] = result["id"]
                 artists.append(artist)
         return artists
+    def filtered_animals(self, query):
+        animals = []
+        
+        database_id = self.config["notion"]["animal_db"]
+
+        headers = self.headers()
+        url = f"https://api.notion.com/v1/databases/{database_id}/query"
+        response = requests.post(url, headers = headers, data = json.dumps(query))
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            results = data["results"]
+            if data["has_more"]:
+                while data["has_more"]:
+                    sleep(0.3)
+                    query["start_cursor"] = data["next_cursor"]
+                    response = requests.post(url, headers = headers, data = json.dumps(query))
+                    if response.status_code == 200:
+                        data = json.loads(response.content)
+                        results = results + data["results"]
+                    else: break
+
+            for result in results:
+                animal = {}
+                animal["name"] = result["properties"]["name"]["title"][0]["plain_text"]
+                animal["id"] = result["id"]
+                animals.append(animal)
+        return animals
     ## Prompts   
     def artist_study_prompts(self):
         return self.filtered_prompts({
@@ -209,11 +235,26 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
+    ## Animals
+    def unprocessed_animals(self):
+        return self.filtered_animals({
+                    "filter": {
+                        "property": "processed",
+                        "checkbox": {
+                            "equals": False
+                        }
+                    },
+                    "sorts": [{
+                        "property": "name",
+                        "direction": "ascending"
+                    }]
+                 })
 
 n = Notion("config.yaml")
 
-mods = n.mods_study_prompts()
-print(len(mods))
+animals = n.unprocessed_animals()
+print(len(animals))
 #n.mark_prompt_done(prompts[0])
-#print(mods)
+print(animals)
+print(len(animals))
 
