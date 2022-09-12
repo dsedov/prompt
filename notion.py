@@ -54,6 +54,12 @@ class Notion:
         response = requests.patch(url, headers = headers, data = json.dumps(query))
         print(response.status_code)
         print(response.content)
+    def update_animal(self, page_id, query):
+        headers = self.headers()
+        url = f"https://api.notion.com/v1/pages/{page_id}"
+        response = requests.patch(url, headers = headers, data = json.dumps(query))
+        print(response.status_code)
+        print(response.content)
 
     def filtered_artists(self, query):
         artists = []
@@ -249,12 +255,32 @@ class Notion:
                         "direction": "ascending"
                     }]
                  })
+    def processed_animals(self):
+        return self.filtered_animals({
+                    "filter": {
+                        "property": "processed",
+                        "checkbox": {
+                            "equals": True
+                        }
+                    },
+                    "sorts": [{
+                        "property": "name",
+                        "direction": "ascending"
+                    }]
+                 })
+    def mark_animal_done(self, animal):
+        self.update_animal(animal["id"],{
+            "properties":{
+                "processed":{
+                    "checkbox" : True
+                }
+            }
+        })
 
-n = Notion("config.yaml")
 
-animals = n.unprocessed_animals()
-print(len(animals))
+#animals = n.unprocessed_animals()
+#print(len(animals))
 #n.mark_prompt_done(prompts[0])
-print(animals)
-print(len(animals))
+#print(animals)
+#print(len(animals))
 
